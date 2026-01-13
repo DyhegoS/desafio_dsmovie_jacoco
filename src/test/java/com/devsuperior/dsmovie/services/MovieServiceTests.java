@@ -21,6 +21,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.devsuperior.dsmovie.dto.MovieDTO;
 import com.devsuperior.dsmovie.entities.MovieEntity;
 import com.devsuperior.dsmovie.repositories.MovieRepository;
+import com.devsuperior.dsmovie.services.exceptions.ResourceNotFoundException;
 import com.devsuperior.dsmovie.tests.MovieFactory;
 
 @ExtendWith(SpringExtension.class)
@@ -35,6 +36,7 @@ public class MovieServiceTests {
 	private long existingMovieId, nonExistingMovieId;
 	
 	private MovieEntity movieEntity;
+	private MovieDTO movieDTO;
 	private PageImpl<MovieEntity> page;
 	
 	@BeforeEach
@@ -42,12 +44,15 @@ public class MovieServiceTests {
 		existingMovieId = 1L;
 		nonExistingMovieId = 2L;
 		movieEntity = MovieFactory.createMovieEntity();
+		movieDTO = MovieFactory.createMovieDTO();
 		page = new PageImpl<>(List.of(movieEntity));
 		
 		Mockito.when(repository.searchByTitle(any(), (Pageable)any())).thenReturn(page);
 		
 		Mockito.when(repository.findById(existingMovieId)).thenReturn(Optional.of(movieEntity));
 		Mockito.when(repository.findById(nonExistingMovieId)).thenReturn(Optional.empty());
+		
+		Mockito.when(repository.save(any())).thenReturn(movieEntity);
 	}
 	
 	@Test
@@ -68,14 +73,22 @@ public class MovieServiceTests {
 		Assertions.assertEquals(result.getTitle(), movieEntity.getTitle());
 	}
 	
-//	@Test
-//	public void findByIdShouldThrowResourceNotFoundExceptionWhenIdDoesNotExist() {
-//	}
-//	
-//	@Test
-//	public void insertShouldReturnMovieDTO() {
-//	}
-//	
+	@Test
+	public void findByIdShouldThrowResourceNotFoundExceptionWhenIdDoesNotExist() {
+		Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+			service.findById(nonExistingMovieId);
+		});
+	}
+	
+	@Test
+	public void insertShouldReturnMovieDTO() {
+		MovieDTO result = service.insert(movieDTO);
+		
+		Assertions.assertNotNull(result);
+		Assertions.assertEquals(result.getId(), movieDTO.getId());
+		Assertions.assertEquals(result.getTitle(), movieDTO.getTitle());
+	}
+	
 //	@Test
 //	public void updateShouldReturnMovieDTOWhenIdExists() {
 //	}

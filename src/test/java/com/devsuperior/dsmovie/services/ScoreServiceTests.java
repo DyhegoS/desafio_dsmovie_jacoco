@@ -78,12 +78,11 @@ public class ScoreServiceTests {
 	@Test
 	public void saveScoreShouldThrowResourceNotFoundExceptionWhenNonExistingMovieId() {
 		movieEntity.setId(nonExistingMovieId);
-		ScoreEntity scoreEntiry = new ScoreEntity();
-		scoreEntiry.setMovie(movieEntity);
-		scoreDTO = new ScoreDTO(scoreEntiry);
+		scoreEntity.setMovie(movieEntity);
+		ScoreDTO scoreDTO = new ScoreDTO(scoreEntity);
+		
 		Assertions.assertThrows(ResourceNotFoundException.class, () -> {
-			service.saveScore(scoreDTO);
-			
+			service.saveScore(scoreDTO);	
 		});
 	}
 }

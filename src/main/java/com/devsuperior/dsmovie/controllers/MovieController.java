@@ -21,44 +21,97 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.devsuperior.dsmovie.dto.MovieDTO;
 import com.devsuperior.dsmovie.services.MovieService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping(value = "/movies")
+@Tag(name = "Movies", description = "Controller for Movie")
 public class MovieController {
 
 	@Autowired
 	private MovieService service;
-
-	@GetMapping
+	
+	@Operation(
+		    description = "Busca todos os filmes",
+		    summary = "Lista todos os filmes",
+		    responses = {
+		         @ApiResponse(description = "Ok", responseCode = "200")
+		   }
+	)
+	@GetMapping(produces = "application/json")
 	public Page<MovieDTO> findAll(
 			@RequestParam(value="title", defaultValue = "") String title, 
 			Pageable pageable) {
 		return service.findAll(title, pageable);
 	}
 
-	@GetMapping(value = "/{id}")
+	@Operation(
+		    description = "Busca filme por Id",
+		    summary = "Busca filme por Id",
+		    responses = {
+		         @ApiResponse(description = "Ok", responseCode = "200"),
+		         @ApiResponse(description = "Not Found", responseCode = "404")
+		   }
+	)
+	@GetMapping(value = "/{id}", produces = "application/json")
 	public MovieDTO findById(@PathVariable Long id) {
 		return service.findById(id);
 	}
-
+	
+	@Operation(
+		    description = "Criar um novo filme",
+		    summary = "Criar um novo filme",
+		    responses = {
+		         @ApiResponse(description = "Created", responseCode = "201"),
+		         @ApiResponse(description = "Bad Request", responseCode = "400"),
+		         @ApiResponse(description = "Unauthorized", responseCode = "401"),
+		         @ApiResponse(description = "Forbidden", responseCode = "403"),
+		         @ApiResponse(description = "Unprocessable Entity", responseCode = "422")
+		   }
+	)
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	@PostMapping
+	@PostMapping(produces = "application/json")
 	public ResponseEntity<MovieDTO> insert(@Valid @RequestBody MovieDTO dto) {
 		dto = service.insert(dto);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(dto.getId()).toUri();
 		return ResponseEntity.created(uri).body(dto);
 	}
-
+	
+	@Operation(
+		    description = "Atualiza informações do filme",
+		    summary = "Atualiza informações do filme",
+		    responses = {
+		         @ApiResponse(description = "Ok", responseCode = "200"),
+		         @ApiResponse(description = "Bad Request", responseCode = "400"),		         
+		         @ApiResponse(description = "Unauthorized", responseCode = "401"),
+		         @ApiResponse(description = "Forbidden", responseCode = "403"),
+		         @ApiResponse(description = "Not Found", responseCode = "404"),
+		         @ApiResponse(description = "Unprocessable Entity", responseCode = "422")
+		   }
+	)
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	@PutMapping(value = "/{id}")
+	@PutMapping(value = "/{id}", produces = "application/json")
 	public ResponseEntity<MovieDTO> update(@PathVariable Long id, @Valid @RequestBody MovieDTO dto) {
 		dto = service.update(id, dto);
 		return ResponseEntity.ok().body(dto);
 	}
-
+	
+	@Operation(
+		    description = "Deleta o filme",
+		    summary = "Deleta o filme",
+		    responses = {
+		         @ApiResponse(description = "Success", responseCode = "204"),		         
+		         @ApiResponse(description = "Bad Request", responseCode = "400"),
+		         @ApiResponse(description = "Unauthorized", responseCode = "401"),
+		         @ApiResponse(description = "Forbidden", responseCode = "403"),
+		         @ApiResponse(description = "Not Found", responseCode = "404")
+		   }
+	)
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	@DeleteMapping(value = "/{id}")
+	@DeleteMapping(value = "/{id}", produces = "application/json")
 	public ResponseEntity<MovieDTO> delete(@PathVariable Long id) {
 		service.delete(id);
 		return ResponseEntity.noContent().build();

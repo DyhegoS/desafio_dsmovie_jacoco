@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.devsuperior.dsmovie.dto.MovieDTO;
+import com.devsuperior.dsmovie.dto.MovieGenreDTO;
 import com.devsuperior.dsmovie.services.MovieService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,6 +49,20 @@ public class MovieController {
 			Pageable pageable) {
 		return service.findAll(title, pageable);
 	}
+	
+	@Operation(
+		    description = "Busca todos os filmes com genêros",
+		    summary = "Lista todos os filmes com genêros",
+		    responses = {
+		         @ApiResponse(description = "Ok", responseCode = "200")
+		   }
+	)
+	@GetMapping(produces = "application/vdn.devsuperior.dsmovie-v1+json")
+	public Page<MovieGenreDTO> findAllV1(
+			@RequestParam(value="title", defaultValue = "") String title, 
+			Pageable pageable) {
+		return service.findAllMovieGenre(title, pageable);
+	}
 
 	@Operation(
 		    description = "Busca filme por Id",
@@ -60,6 +75,19 @@ public class MovieController {
 	@GetMapping(value = "/{id}", produces = "application/json")
 	public MovieDTO findById(@PathVariable Long id) {
 		return service.findById(id);
+	}
+	
+	@Operation(
+		    description = "Busca filme por Id com genêros",
+		    summary = "Busca filme por Id com genêros",
+		    responses = {
+		         @ApiResponse(description = "Ok", responseCode = "200"),
+		         @ApiResponse(description = "Not Found", responseCode = "404")
+		   }
+	)
+	@GetMapping(value = "/{id}", produces = "application/vdn.devsuperior.dsmovie-v1+json")
+	public MovieGenreDTO findByIdV1(@PathVariable Long id) {
+		return service.findByIdMovieGenre(id);
 	}
 	
 	@Operation(
